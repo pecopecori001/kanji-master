@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>漢字宿題練習 ドリル9-1</title>
+<style>
+  :root{
+    --bg:#f6f3ed;
+    --card:#fff;
+    --ink:#2f2f2f;
+    --accent:#d45c72;
+    --blue:#4d86c6;
+    --muted:#777;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:"Hiragino Sans","Yu Gothic","Meiryo",sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+  }
+  .wrap{
+    max-width:760px;
+    margin:0 auto;
+    padding:18px;
+  }
+  h1{
+    margin:8px 0 4px;
+    font-size:28px;
+  }
+  .sub{
+    color:var(--muted);
+    margin-bottom:14px;
+  }
+  .card{
+    background:var(--card);
+    border-radius:18px;
+    box-shadow:0 8px 24px rgba(0,0,0,.08);
+    padding:26px 24px 30px;
+  }
+  .qnum{
+    font-weight:700;
+    color:var(--blue);
+    margin-bottom:20px;
+    font-size:18px;
+  }
+  .sentence{
+    font-size:30px;
+    line-height:2.3;
+    margin:0 0 24px;
+  }
+  .target{
+    display:inline-flex;
+    flex-direction:column;
+    align-items:center;
+    vertical-align:middle;
+    line-height:1.1;
+    margin:0 .08em;
+  }
+  .reading{
+    font-size:.68em;
+    color:#555;
+    margin-bottom:3px;
+    white-space:nowrap;
+  }
+  .line{
+    display:inline-block;
+    min-width:4.2em;
+    height:1.05em;
+    border-bottom:4px solid var(--accent);
+  }
+  .line.short{min-width:2.2em}
+  .line.long{min-width:5.5em}
+  .buttons{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-top:8px;
+  }
+  button{
+    border:0;
+    border-radius:12px;
+    padding:12px 18px;
+    font-size:17px;
+    font-weight:700;
+    cursor:pointer;
+  }
+  .primary{background:var(--blue);color:#fff}
+  .secondary{background:#ece8e1;color:#333}
+  .answerBox{
+    margin-top:18px;
+    min-height:72px;
+    padding:14px 16px;
+    border-radius:12px;
+    background:#faf8f4;
+    display:none;
+  }
+  .answerLabel{
+    color:#777;
+    font-size:14px;
+    margin-bottom:4px;
+  }
+  .answer{
+    font-size:28px;
+    font-weight:700;
+  }
+  .strokeTitle{
+    margin-top:16px;
+    font-size:15px;
+    color:#666;
+    font-weight:700;
+  }
+  .strokeWrap{
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+    margin-top:9px;
+  }
+  .strokeItem{
+    text-align:center;
+  }
+  .strokeCanvas{
+    width:120px;
+    height:120px;
+    background:white;
+    border:1px solid #ddd;
+    border-radius:10px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+  }
+  .strokeCanvas svg{
+    width:112px;
+    height:112px;
+  }
+  .strokeControls{
+    margin-top:8px;
+    display:flex;
+    gap:6px;
+    flex-wrap:wrap;
+    justify-content:center;
+  }
+  .miniBtn{
+    padding:7px 10px;
+    font-size:13px;
+    border-radius:9px;
+    background:#ece8e1;
+    color:#333;
+  }
+  .strokeChar{
+    margin-top:3px;
+    font-size:14px;
+    color:#555;
+  }
+  .footer{
+    margin-top:16px;
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    justify-content:center;
+  }
+  .counter{
+    text-align:center;
+    color:#666;
+    margin-top:14px;
+    font-size:14px;
+  }
+  @media (max-width:560px){
+    .sentence{font-size:24px}
+    h1{font-size:23px}
+    .card{padding:22px 18px 26px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>漢字宿題練習</h1>
+  <div class="sub">ドリル9・①〜⑩　赤線の上の読みを見て、紙に漢字を書こう</div>
+
+  <div class="card">
+    <div class="qnum" id="qnum"></div>
+    <div class="sentence" id="sentence"></div>
+
+    <div class="buttons">
+      <button class="primary" id="showBtn">答えを見る</button>
+      <button class="secondary" id="nextBtn">次へ</button>
+    </div>
+
+    <div class="answerBox" id="answerBox">
+      <div class="answerLabel">答え</div>
+      <div class="answer" id="answer"></div>
+      <div class="strokeTitle">漢字の書き順</div>
+      <div class="strokeWrap" id="strokeWrap"></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <button class="secondary" id="prevBtn">前へ</button>
+    <button class="secondary" id="restartBtn">①から</button>
+  </div>
+
+  <div class="counter" id="counter"></div>
+</div>
+
+<script>
+const questions = [
+  {
+    html:`強い <span class="target"><span class="reading">いんしょう</span><span class="line"></span></span> を受ける。`,
+    answer:"印象"
+  },
+  {
+    html:`<span class="target"><span class="reading">きほん</span><span class="line"></span></span> を学ぶ。`,
+    answer:"基本"
+  },
+  {
+    html:`<span class="target"><span class="reading">てきせつ</span><span class="line"></span></span> に <span class="target"><span class="reading">しゅうせい</span><span class="line"></span></span> する。`,
+    answer:"適切・修正"
+  },
+  {
+    html:`<span class="target"><span class="reading">じゅんじょ</span><span class="line"></span></span> よくならぶ。`,
+    answer:"順序"
+  },
+  {
+    html:`事件を <span class="target"><span class="reading">かいけつ</span><span class="line"></span></span> する。`,
+    answer:"解決"
+  },
+  {
+    html:`外国にすむ <span class="target"><span class="reading">ぞう</span><span class="line short"></span></span> が <span class="target"><span class="reading">へ</span><span class="line short"></span></span> る。`,
+    answer:"象・減"
+  },
+  {
+    html:`栄養士の <span class="target"><span class="reading">しかく</span><span class="line"></span></span> を取る。`,
+    answer:"資格"
+  },
+  {
+    html:`売り上げの <span class="target"><span class="reading">そうがく</span><span class="line"></span></span>。`,
+    answer:"総額"
+  },
+  {
+    html:`船を <span class="target"><span class="reading">か</span><span class="line short"></span></span> し <span class="target"><span class="reading">だ</span><span class="line short"></span></span> す。`,
+    answer:"貸・出"
+  },
+  {
+    html:`<span class="target"><span class="reading">まず</span><span class="line short"></span></span> しい生活。`,
+    answer:"貧"
+  }
+];
+
+
+
+const strokeBase = "https://raw.githubusercontent.com/KanjiVG/kanjivg/master/kanji/";
+
+function kanjiSvgUrl(ch){
+  return strokeBase + ch.codePointAt(0).toString(16).padStart(5,"0") + ".svg";
+}
+
+function sleep(ms){
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function animateSvg(svg){
+  const paths = [...svg.querySelectorAll("path")];
+  if(!paths.length) return;
+
+  paths.forEach(p=>{
+    let len = 0;
+    try { len = p.getTotalLength(); } catch(e) {}
+    if(!len || !isFinite(len)) len = 500;
+
+    p.dataset.len = String(len);
+    p.style.fill = "none";
+    p.style.stroke = "#222";
+    p.style.strokeWidth = "3.2";
+    p.style.strokeLinecap = "round";
+    p.style.strokeLinejoin = "round";
+    p.style.strokeDasharray = `${len} ${len}`;
+    p.style.strokeDashoffset = `${len}`;
+    p.style.transition = "none";
+    p.style.opacity = "1";
+  });
+
+  // レイアウトを確定させる
+  void svg.offsetWidth;
+  await sleep(80);
+
+  for(const p of paths){
+    p.style.transition = "stroke-dashoffset .48s linear";
+    p.style.strokeDashoffset = "0";
+    await sleep(560);
+  }
+}
+
+
+async function createStrokeItem(ch){
+  const item = document.createElement("div");
+  item.className = "strokeItem";
+
+  const canvas = document.createElement("div");
+  canvas.className = "strokeCanvas";
+  canvas.textContent = "読込中…";
+
+  const cap = document.createElement("div");
+  cap.className = "strokeChar";
+  cap.textContent = ch;
+
+  const controls = document.createElement("div");
+  controls.className = "strokeControls";
+
+  const playBtn = document.createElement("button");
+  playBtn.type = "button";
+  playBtn.className = "miniBtn";
+  playBtn.textContent = "書き順を再生";
+
+  controls.appendChild(playBtn);
+
+  item.appendChild(canvas);
+  item.appendChild(cap);
+  item.appendChild(controls);
+
+  try{
+    const res = await fetch(kanjiSvgUrl(ch));
+    if(!res.ok) throw new Error("svg load failed");
+    const text = await res.text();
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(text, "image/svg+xml");
+    const svg = doc.documentElement;
+
+    [...svg.querySelectorAll("text")].forEach(el=>el.remove());
+    svg.setAttribute("viewBox", svg.getAttribute("viewBox") || "0 0 109 109");
+    svg.removeAttribute("width");
+    svg.removeAttribute("height");
+
+    [...svg.querySelectorAll("path")].forEach(p=>{
+      p.removeAttribute("style");
+      p.removeAttribute("class");
+    });
+
+    canvas.textContent = "";
+    canvas.appendChild(svg);
+
+    const run = async ()=>{
+      playBtn.disabled = true;
+      await animateSvg(svg);
+      playBtn.disabled = false;
+    };
+
+    playBtn.addEventListener("click", run);
+
+    return {item, svg};
+  }catch(e){
+    canvas.textContent = "表示できません";
+    playBtn.disabled = true;
+    return {item, svg:null};
+  }
+}
+
+async function showStrokeOrder(){
+  const wrap = document.getElementById("strokeWrap");
+  wrap.innerHTML = "";
+  const chars = [...questions[index].answer].filter(ch => /[\u3400-\u9fff]/.test(ch));
+
+  for(const ch of chars){
+    const obj = await createStrokeItem(ch);
+    wrap.appendChild(obj.item);
+  }
+}
+
+let index = 0;
+const qnum = document.getElementById("qnum");
+const sentence = document.getElementById("sentence");
+const answerBox = document.getElementById("answerBox");
+const answer = document.getElementById("answer");
+const counter = document.getElementById("counter");
+
+function render(){
+  qnum.textContent = `問題 ${index+1}`;
+  sentence.innerHTML = questions[index].html;
+  answer.textContent = questions[index].answer;
+  answerBox.style.display = "none";
+  counter.textContent = `${index+1} / ${questions.length}`;
+}
+
+document.getElementById("showBtn").addEventListener("click",()=>{
+  answerBox.style.display = "block";
+  showStrokeOrder();
+});
+
+
+document.getElementById("nextBtn").addEventListener("click",()=>{
+  if(index < questions.length-1){
+    index++;
+    render();
+  }
+});
+
+document.getElementById("prevBtn").addEventListener("click",()=>{
+  if(index > 0){
+    index--;
+    render();
+  }
+});
+
+document.getElementById("restartBtn").addEventListener("click",()=>{
+  index = 0;
+  render();
+});
+
+render();
+</script>
+</body>
+</html>
