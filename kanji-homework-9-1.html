@@ -78,6 +78,20 @@
     flex-wrap:wrap;
     margin-top:8px;
   }
+  .judgeButtons{
+    display:none;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-top:14px;
+  }
+  .okBtn{
+    background:#2f8f62;
+    color:#fff;
+  }
+  .ngBtn{
+    background:#c84a4a;
+    color:#fff;
+  }
   button{
     border:0;
     border-radius:12px;
@@ -185,7 +199,6 @@
 
     <div class="buttons">
       <button class="primary" id="showBtn">答えを見る</button>
-      <button class="secondary" id="nextBtn">次へ</button>
     </div>
 
     <div class="answerBox" id="answerBox">
@@ -193,12 +206,15 @@
       <div class="answer" id="answer"></div>
       <div class="strokeTitle">漢字の書き順</div>
       <div class="strokeWrap" id="strokeWrap"></div>
+      <div class="judgeButtons" id="judgeButtons">
+        <button class="okBtn" id="okBtn" type="button">〇 できた</button>
+        <button class="ngBtn" id="ngBtn" type="button">× もう一度</button>
+      </div>
     </div>
   </div>
 
   <div class="footer">
-    <button class="secondary" id="prevBtn">前へ</button>
-    <button class="secondary" id="restartBtn">①から</button>
+    <button class="secondary" id="restartBtn">最初からやり直す</button>
   </div>
 
   <div class="counter" id="counter"></div>
@@ -359,7 +375,7 @@ async function createStrokeItem(ch){
 async function showStrokeOrder(){
   const wrap = document.getElementById("strokeWrap");
   wrap.innerHTML = "";
-  const chars = [...questions[index].answer].filter(ch => /[\u3400-\u9fff]/.test(ch));
+  const chars = [...questions[currentQuestionIndex()].answer].filter(ch => /[\u3400-\u9fff]/.test(ch));
 
   for(const ch of chars){
     const obj = await createStrokeItem(ch);
@@ -367,43 +383,81 @@ async function showStrokeOrder(){
   }
 }
 
-let index = 0;
+
+let queue = [...Array(questions.length).keys()];
+let currentPos = 0;
+let cycle = 1;
+
 const qnum = document.getElementById("qnum");
 const sentence = document.getElementById("sentence");
 const answerBox = document.getElementById("answerBox");
 const answer = document.getElementById("answer");
 const counter = document.getElementById("counter");
+const judgeButtons = document.getElementById("judgeButtons");
+
+function currentQuestionIndex(){
+  return queue[currentPos];
+}
 
 function render(){
-  qnum.textContent = `問題 ${index+1}`;
-  sentence.innerHTML = questions[index].html;
-  answer.textContent = questions[index].answer;
+  if(queue.length === 0){
+    qnum.textContent = "終了";
+    sentence.innerHTML = "全部できました！";
+    answerBox.style.display = "none";
+    judgeButtons.style.display = "none";
+    counter.textContent = "";
+    return;
+  }
+
+  const qi = currentQuestionIndex();
+  qnum.textContent = `問題 ${currentPos+1} / ${queue.length}`;
+  sentence.innerHTML = questions[qi].html;
+  answer.textContent = questions[qi].answer;
   answerBox.style.display = "none";
-  counter.textContent = `${index+1} / ${questions.length}`;
+  judgeButtons.style.display = "none";
+  document.getElementById("strokeWrap").innerHTML = "";
+  counter.textContent = `残り ${queue.length} 問`;
 }
 
 document.getElementById("showBtn").addEventListener("click",()=>{
+  if(queue.length === 0) return;
   answerBox.style.display = "block";
+  judgeButtons.style.display = "flex";
   showStrokeOrder();
 });
 
+function advanceAfterJudge(markCorrect){
+  if(queue.length === 0) return;
 
-document.getElementById("nextBtn").addEventListener("click",()=>{
-  if(index < questions.length-1){
-    index++;
-    render();
+  if(markCorrect){
+    // 正解した問題はキューから削除。
+    queue.splice(currentPos, 1);
+    if(queue.length === 0){
+      render();
+      return;
+    }
+    // 削除後、同じ位置に次の問題が入る。
+    if(currentPos >= queue.length) currentPos = 0;
+  }else{
+    // ×は残す。次の問題へ進み、最後なら先頭へ戻る。
+    currentPos++;
+    if(currentPos >= queue.length) currentPos = 0;
   }
+  render();
+}
+
+document.getElementById("okBtn").addEventListener("click",()=>{
+  advanceAfterJudge(true);
 });
 
-document.getElementById("prevBtn").addEventListener("click",()=>{
-  if(index > 0){
-    index--;
-    render();
-  }
+document.getElementById("ngBtn").addEventListener("click",()=>{
+  advanceAfterJudge(false);
 });
 
 document.getElementById("restartBtn").addEventListener("click",()=>{
-  index = 0;
+  queue = [...Array(questions.length).keys()];
+  currentPos = 0;
+  cycle = 1;
   render();
 });
 
