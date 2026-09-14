@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>漢字練習 11〜20</title>
+<style>
+:root {
+  --bg:#f7f7f8; --card:#fff; --text:#222; --muted:#666; --line:#ddd;
+}
+* { box-sizing:border-box; }
+body {
+  margin:0; background:var(--bg); color:var(--text);
+  font-family:"UD デジタル 教科書体 N-R","UD Digi Kyokasho N-R","UD デジタル 教科書体 NP-R","YuKyokasho","Yu Kyokasho","Hiragino Mincho ProN","Yu Mincho",serif;
+}
+.wrap { max-width:760px; margin:auto; padding:18px 14px 40px; }
+h1 { font-size:1.35rem; margin:0 0 4px; }
+.sub { color:var(--muted); font-size:.95rem; margin-bottom:14px; }
+.progress { font-weight:700; margin:10px 0; }
+.bar { height:8px; background:#e7e7e7; border-radius:999px; overflow:hidden; }
+.bar > div { height:100%; background:#777; width:0%; transition:.25s; }
+.card {
+  margin-top:16px; background:var(--card); border:1px solid var(--line);
+  border-radius:18px; padding:22px 18px; box-shadow:0 2px 10px rgba(0,0,0,.04);
+}
+.num { font-weight:800; color:#555; margin-bottom:14px; }
+.q { font-size:1.65rem; line-height:1.8; letter-spacing:.02em; }
+.target { color:#d40000; font-weight:700; }
+.hint {
+  margin-top:8px; color:#777; font-size:.9rem;
+}
+button {
+  appearance:none; border:1px solid #bbb; background:#fff; color:#222;
+  border-radius:12px; padding:12px 16px; font-size:1rem; font-weight:700;
+}
+button:active { transform:translateY(1px); }
+.mainbtn { width:100%; margin-top:18px; font-size:1.08rem; }
+.answer {
+  display:none; margin-top:20px; padding-top:18px; border-top:1px dashed #ccc;
+}
+.answerLabel { color:#666; font-size:.9rem; }
+.answerText { font-size:2rem; font-weight:700; margin:4px 0 14px; }
+.judge { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.ok { border-color:#8bbf9a; }
+.ng { border-color:#d99; }
+.controls {
+  display:flex; gap:8px; flex-wrap:wrap; margin-top:16px;
+}
+.controls button { flex:1 1 120px; font-size:.92rem; }
+.result {
+  display:none; margin-top:18px; background:#fff; border:1px solid #ddd;
+  border-radius:16px; padding:18px;
+}
+.result h2 { margin-top:0; }
+.big { font-size:1.3rem; font-weight:800; }
+.small { font-size:.9rem; color:#666; }
+.strokeArea {
+  display:none; margin-top:12px; border-top:1px dashed #ddd; padding-top:12px;
+}
+.strokeGrid {
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:10px;
+}
+.strokeBox {
+  border:1px solid #ddd; border-radius:12px; padding:10px; text-align:center;
+}
+.strokeChar { font-size:2rem; font-weight:800; }
+.svgHost { 
+  height:132px; display:flex; align-items:center; justify-content:center; color:#888;
+  background:
+    linear-gradient(to right, transparent 49.5%, #eee 49.5%, #eee 50.5%, transparent 50.5%),
+    linear-gradient(to bottom, transparent 49.5%, #eee 49.5%, #eee 50.5%, transparent 50.5%);
+  border:1px solid #eee; border-radius:8px; margin:8px 0;
+}
+.svgHost svg { width:118px; height:118px; }
+.strokeBtn { width:100%; padding:8px; font-size:.9rem; }
+.footer { margin-top:14px; color:#777; font-size:.82rem; line-height:1.5; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>漢字練習 11〜20</h1>
+  <div class="sub">紙に書いてから答えを確認。×は最後にもう一度出ます。</div>
+  <div class="progress" id="progressText"></div>
+  <div class="bar"><div id="barFill"></div></div>
+
+  <div class="card" id="card">
+    <div class="num" id="qid"></div>
+    <div class="q" id="qtext"></div>
+    <div class="hint">（　）の部分を漢字で書こう</div>
+
+    <button class="mainbtn" id="showAnswer">答えを見る</button>
+
+    <div class="answer" id="answer">
+      <div class="answerLabel">答え</div>
+      <div class="answerText" id="answerText"></div>
+      <button id="showStroke" style="margin-bottom:12px;">書き順を見る</button>
+      <div class="strokeArea" id="strokeArea">
+        <div class="strokeGrid" id="strokeGrid"></div>
+      </div>
+      <div class="judge">
+        <button class="ok" id="okBtn">○ できた</button>
+        <button class="ng" id="ngBtn">× もう一度</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="result" id="result">
+    <h2>1周おわり</h2>
+    <div class="big" id="resultText"></div>
+    <div id="resultButtons" class="controls"></div>
+  </div>
+
+  <div class="controls">
+    <button id="restartBtn">最初から</button>
+    <button id="shuffleBtn">順番をまぜる</button>
+  </div>
+  <div class="footer">※書き順表示だけはインターネット接続を使います。書き順が読み込めなくても、問題・答え・○×機能はそのまま使えます。</div>
+</div>
+
+<script>
+const ALL = [{"id": "11-1", "q": "（あんぜんきじゅん）をみたす。", "a": "安全基準", "kanji": "安全基準"}, {"id": "11-2", "q": "あんぜんきじゅんを（みたす）。", "a": "満たす", "kanji": "満"}, {"id": "12-1", "q": "（せんぞだいだい）のはか。", "a": "先祖代々", "kanji": "先祖代々"}, {"id": "12-2", "q": "せんぞだいだいの（はか）。", "a": "墓", "kanji": "墓"}, {"id": "13-1", "q": "（ぼち）でまよう。", "a": "墓地", "kanji": "墓地"}, {"id": "13-2", "q": "ぼちで（まよう）。", "a": "迷う", "kanji": "迷"}, {"id": "14-1", "q": "（まいご）をさがす。", "a": "迷子", "kanji": "迷子"}, {"id": "15-1", "q": "（じじつ）をきじゅつする。", "a": "事実", "kanji": "事実"}, {"id": "15-2", "q": "じじつを（きじゅつ）する。", "a": "記述", "kanji": "記述"}, {"id": "16-1", "q": "（がくぎょう）をおさめる。", "a": "学業", "kanji": "学業"}, {"id": "16-2", "q": "がくぎょうを（おさめる）。", "a": "修める", "kanji": "修"}, {"id": "17-1", "q": "（もんだい）をとく。", "a": "問題", "kanji": "問題"}, {"id": "17-2", "q": "もんだいを（とく）。", "a": "解く", "kanji": "解"}, {"id": "18-1", "q": "（じんこう）がげんしょうする。", "a": "人口", "kanji": "人口"}, {"id": "18-2", "q": "じんこうが（げんしょう）する。", "a": "減少", "kanji": "減少"}, {"id": "19-1", "q": "（びんぼう）くじをひく。", "a": "貧乏", "kanji": "貧乏"}, {"id": "19-2", "q": "びんぼうくじを（ひく）。", "a": "引く", "kanji": "引"}, {"id": "20-1", "q": "（じぶん）のかんがえをのべる。", "a": "自分", "kanji": "自分"}, {"id": "20-2", "q": "じぶんの（かんがえ）をのべる。", "a": "考え", "kanji": "考"}, {"id": "20-3", "q": "じぶんのかんがえを（のべる）。", "a": "述べる", "kanji": "述"}];
+let queue = ALL.map((_,i)=>i);
+let pos = 0;
+let wrong = [];
+let correctCount = 0;
+
+const $ = id => document.getElementById(id);
+
+function current() { return ALL[queue[pos]]; }
+
+function updateProgress() {
+  const total = queue.length;
+  const now = Math.min(pos+1,total);
+  $("progressText").textContent = `問題 ${now} / ${total}`;
+  $("barFill").style.width = total ? `${(pos/total)*100}%` : "0%";
+}
+
+function render() {
+  $("result").style.display = "none";
+  $("card").style.display = "block";
+  const item = current();
+  $("qid").textContent = item.id;
+  const qhtml = item.q.replace(/（([^）]+)）/, '（<span class="target">$1</span>）');
+  $("qtext").innerHTML = qhtml;
+  $("answerText").textContent = item.a;
+  $("answer").style.display = "none";
+  $("showAnswer").style.display = "block";
+  $("strokeArea").style.display = "none";
+  $("strokeGrid").innerHTML = "";
+  $("showStroke").textContent = "書き順を見る";
+  updateProgress();
+}
+
+$("showAnswer").onclick = () => {
+  $("answer").style.display = "block";
+  $("showAnswer").style.display = "none";
+};
+
+function judge(isCorrect) {
+  if (!isCorrect) wrong.push(queue[pos]);
+  else correctCount++;
+  pos++;
+  if (pos >= queue.length) finishRound();
+  else render();
+}
+
+$("okBtn").onclick = () => judge(true);
+$("ngBtn").onclick = () => judge(false);
+
+function finishRound() {
+  $("card").style.display = "none";
+  $("barFill").style.width = "100%";
+  $("progressText").textContent = "この周回は終了";
+  $("result").style.display = "block";
+  const buttons = $("resultButtons");
+  buttons.innerHTML = "";
+
+  if (wrong.length === 0) {
+    $("resultText").textContent = "全問できました！";
+    const b = document.createElement("button");
+    b.textContent = "もう一度ぜんぶ";
+    b.onclick = restart;
+    buttons.appendChild(b);
+  } else {
+    $("resultText").textContent = `× が ${wrong.length}問あります。`;
+    const b1 = document.createElement("button");
+    b1.textContent = "×だけもう一度";
+    b1.onclick = () => {
+      queue = [...wrong];
+      wrong = [];
+      pos = 0;
+      correctCount = 0;
+      render();
+    };
+    buttons.appendChild(b1);
+
+    const b2 = document.createElement("button");
+    b2.textContent = "ぜんぶ最初から";
+    b2.onclick = restart;
+    buttons.appendChild(b2);
+  }
+}
+
+function restart() {
+  queue = ALL.map((_,i)=>i);
+  pos = 0; wrong = []; correctCount = 0;
+  render();
+}
+$("restartBtn").onclick = restart;
+
+$("shuffleBtn").onclick = () => {
+  queue = ALL.map((_,i)=>i);
+  for (let i=queue.length-1;i>0;i--) {
+    const j = Math.floor(Math.random()*(i+1));
+    [queue[i],queue[j]] = [queue[j],queue[i]];
+  }
+  pos=0; wrong=[]; correctCount=0; render();
+};
+
+function uniqueHan(chars) {
+  return [...new Set([...chars].filter(ch => /\p{Script=Han}/u.test(ch)))];
+}
+
+async function fetchSvg(ch, host, btn) {
+  btn.disabled = true;
+  btn.textContent = "読み込み中…";
+  const hex = ch.codePointAt(0).toString(16).padStart(5,"0");
+  const urls = [
+    `https://cdn.jsdelivr.net/gh/KanjiVG/kanjivg@master/kanji/${hex}.svg`,
+    `https://raw.githubusercontent.com/KanjiVG/kanjivg/master/kanji/${hex}.svg`
+  ];
+  let text = null;
+  for (const url of urls) {
+    try {
+      const c = new AbortController();
+      const t = setTimeout(()=>c.abort(), 4500);
+      const r = await fetch(url, {signal:c.signal});
+      clearTimeout(t);
+      if (r.ok) { text = await r.text(); break; }
+    } catch(e) {}
+  }
+  if (!text) {
+    host.textContent = "書き順を読み込めませんでした";
+    btn.textContent = "再試行";
+    btn.disabled = false;
+    return;
+  }
+  const doc = new DOMParser().parseFromString(text,"image/svg+xml");
+  const svg = doc.documentElement;
+  svg.removeAttribute("width"); svg.removeAttribute("height");
+  svg.setAttribute("viewBox","0 0 109 109");
+  svg.querySelectorAll("text").forEach(x=>x.remove());
+  [...svg.querySelectorAll("path")].forEach(p=>{
+    p.style.fill="none"; 
+    p.style.stroke="#111"; 
+    p.style.strokeWidth="3.6";
+    p.style.strokeLinecap="round"; 
+    p.style.strokeLinejoin="round";
+  });
+  host.innerHTML="";
+  host.appendChild(document.importNode(svg,true));
+  btn.textContent="書き順を再生";
+  btn.disabled=false;
+  btn.onclick=()=>animate(host);
+  animate(host);
+}
+
+function animate(host) {
+  const paths=[...host.querySelectorAll("path")];
+  if(!paths.length) return;
+  paths.forEach(p=>{
+    const len=p.getTotalLength();
+    p.style.transition="none";
+    p.style.strokeDasharray=len;
+    p.style.strokeDashoffset=len;
+  });
+  requestAnimationFrame(()=>{
+    let delay=0;
+    paths.forEach(p=>{
+      p.style.transition=`stroke-dashoffset 520ms ease ${delay}ms`;
+      p.style.strokeDashoffset="0";
+      delay+=570;
+    });
+  });
+}
+
+$("showStroke").onclick = () => {
+  const area=$("strokeArea"), grid=$("strokeGrid");
+  if (area.style.display === "block") {
+    area.style.display="none";
+    $("showStroke").textContent="書き順を見る";
+    return;
+  }
+  area.style.display="block";
+  $("showStroke").textContent="書き順を閉じる";
+  if (grid.children.length) return;
+  const chars = uniqueHan(current().kanji);
+  chars.forEach(ch=>{
+    const box=document.createElement("div");
+    box.className="strokeBox";
+    box.innerHTML=`<div class="strokeChar">${ch}</div><div class="svgHost">未読み込み</div><button class="strokeBtn">書き順を再生</button>`;
+    grid.appendChild(box);
+    const host=box.querySelector(".svgHost");
+    const btn=box.querySelector(".strokeBtn");
+    btn.onclick=()=>fetchSvg(ch,host,btn);
+  });
+};
+
+render();
+</script>
+</body>
+</html>
