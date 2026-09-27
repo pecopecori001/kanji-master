@@ -1,0 +1,42 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>漢字練習15・16</title><style>
+*{box-sizing:border-box}body{margin:0;font-family:"BIZ UDPGothic","Yu Gothic",sans-serif;color:#222}.app{max-width:540px;margin:auto;padding:18px}
+h1{font-size:25px;margin:0 0 12px;border-bottom:1px solid #ddd;padding-bottom:12px}.stats{display:flex;gap:8px}.s{flex:1;background:#f1f2f4;border-radius:14px;text-align:center;padding:9px 2px;font-size:13px}.s b{font-size:23px}
+.card{margin-top:16px;border:1px solid #d5d5d5;border-radius:20px;min-height:280px;padding:18px;display:flex;flex-direction:column;justify-content:center}.no{color:#666;font-size:13px;margin-bottom:12px}.q{font-size:25px;line-height:1.75;text-align:center}.t{color:#d22;text-decoration:underline 2px;text-underline-offset:5px;font-weight:bold}
+#ans{display:none;text-align:center;margin-top:12px}.answer{font-family:"Yu Mincho","Noto Serif JP",serif;font-size:44px;font-weight:600}.strokeTitle{font-size:12px;color:#666;margin:8px 0 5px}
+.strokeRow{display:flex;gap:7px;justify-content:center;flex-wrap:wrap}.strokeBox{width:76px;height:76px;border:1px solid #ddd;border-radius:8px;background:#fff;overflow:hidden}.strokeBox svg{width:100%;height:100%}.kana{display:flex;align-items:center;justify-content:center;width:76px;height:76px;border:1px solid #ddd;border-radius:8px;font-size:26px}
+.note{font-size:11px;color:#777;margin-top:4px}button{width:100%;border:0;border-radius:15px;padding:15px;font-size:18px;font-weight:bold;margin-top:13px}#show{background:#1976d2;color:#fff}#grades{display:none;gap:7px}#grades button{font-size:15px;padding:13px 3px;background:#eee}#grades .ok{background:#e4f4e8}#grades .ng{background:#fde7e7}
+#finish{display:none;text-align:center;padding:55px 10px}#finish button{background:#1976d2;color:#fff}
+</style></head><body><div class="app"><h1>漢字練習 15・16</h1><div class="stats"><div class="s">覚えた<br><b id="ok">0</b></div><div class="s">覚えてない<br><b id="ng">0</b></div><div class="s">まだ<br><b id="yet">41</b></div></div>
+<div id="main"><div class="card"><div class="no" id="no"></div><div class="q" id="q"></div><div id="ans"><div class="answer" id="a"></div><div class="strokeTitle">書き順</div><div class="strokeRow" id="strokes"></div><div class="note">書き順データ：KanjiVG（通信できる環境で表示）</div></div></div>
+<button id="show">答えを見る</button><div id="grades"><button class="ok" id="bOk">○ 覚えた</button><button id="bMid">△ もう一度</button><button class="ng" id="bNg">× まだ</button></div></div>
+<div id="finish"><h2>おわり！</h2><p id="sum"></p><button id="again">もう一度</button></div></div>
+<script>
+var Q=[{"id": "1-1", "text": "そんがいをこうむる。", "target": "そんがい", "answer": "損害"}, {"id": "2-1", "text": "せいようづくりのいえ。", "target": "せいよう", "answer": "西洋"}, {"id": "2-2", "text": "せいようづくりのいえ。", "target": "づくり", "answer": "造り"}, {"id": "2-3", "text": "せいようづくりのいえ。", "target": "いえ", "answer": "家"}, {"id": "3-1", "text": "としょかんによる。", "target": "としょかん", "answer": "図書館"}, {"id": "3-2", "text": "としょかんによる。", "target": "よる", "answer": "寄る"}, {"id": "4-1", "text": "あたらしいめがね。", "target": "あたらしい", "answer": "新しい"}, {"id": "4-2", "text": "あたらしいめがね。", "target": "めがね", "answer": "眼鏡"}, {"id": "5-1", "text": "そとはひじょうにあつい。", "target": "そと", "answer": "外"}, {"id": "5-2", "text": "そとはひじょうにあつい。", "target": "ひじょう", "answer": "非常"}, {"id": "5-3", "text": "そとはひじょうにあつい。", "target": "あつい", "answer": "暑い"}, {"id": "6-1", "text": "むしばをよぼうする。", "target": "むしば", "answer": "虫歯"}, {"id": "6-2", "text": "むしばをよぼうする。", "target": "よぼう", "answer": "予防"}, {"id": "7-1", "text": "きのどくにおもう。", "target": "き", "answer": "気"}, {"id": "7-2", "text": "きのどくにおもう。", "target": "どく", "answer": "毒"}, {"id": "7-3", "text": "きのどくにおもう。", "target": "おもう", "answer": "思う"}, {"id": "8-1", "text": "せきにんをおう。", "target": "せきにん", "answer": "責任"}, {"id": "8-2", "text": "せきにんをおう。", "target": "おう", "answer": "負う"}, {"id": "9-1", "text": "きろくをやぶる。", "target": "きろく", "answer": "記録"}, {"id": "9-2", "text": "きろくをやぶる。", "target": "やぶる", "answer": "破る"}, {"id": "10-1", "text": "きのえだがのびる。", "target": "き", "answer": "木"}, {"id": "10-2", "text": "きのえだがのびる。", "target": "えだ", "answer": "枝"}, {"id": "11-1", "text": "やまのりょうし。", "target": "やま", "answer": "山"}, {"id": "11-2", "text": "やまのりょうし。", "target": "りょうし", "answer": "りょう師"}, {"id": "12-1", "text": "あつりょくをかける。", "target": "あつりょく", "answer": "圧力"}, {"id": "13-1", "text": "こくえいのテレビほうそう。", "target": "こくえい", "answer": "国営"}, {"id": "13-2", "text": "こくえいのテレビほうそう。", "target": "ほうそう", "answer": "放送"}, {"id": "14-1", "text": "かちのあるたてもの。", "target": "かち", "answer": "価値"}, {"id": "14-2", "text": "かちのあるたてもの。", "target": "たてもの", "answer": "建物"}, {"id": "15-1", "text": "ふるいせいどをかえる。", "target": "ふるい", "answer": "古い"}, {"id": "15-2", "text": "ふるいせいどをかえる。", "target": "せいど", "answer": "制度"}, {"id": "15-3", "text": "ふるいせいどをかえる。", "target": "かえる", "answer": "変える"}, {"id": "16-1", "text": "しんまいをたべる。", "target": "しんまい", "answer": "新米"}, {"id": "16-2", "text": "しんまいをたべる。", "target": "たべる", "answer": "食べる"}, {"id": "17-1", "text": "ひりょうをまく。", "target": "ひりょう", "answer": "肥料"}, {"id": "18-1", "text": "きゅうしきのきかい。", "target": "きゅうしき", "answer": "旧式"}, {"id": "18-2", "text": "きゅうしきのきかい。", "target": "きかい", "answer": "機械"}, {"id": "19-1", "text": "ぎゃくせつのかんけい。", "target": "ぎゃくせつ", "answer": "逆接"}, {"id": "19-2", "text": "ぎゃくせつのかんけい。", "target": "かんけい", "answer": "関係"}, {"id": "20-1", "text": "しょてんをいとなむ。", "target": "しょてん", "answer": "書店"}, {"id": "20-2", "text": "しょてんをいとなむ。", "target": "いとなむ", "answer": "営む"}],idx=0,good=0,bad=0;
+function e(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
+function isKanji(ch){var c=ch.codePointAt(0);return (c>=0x3400&&c<=0x9fff)||(c>=0xf900&&c<=0xfaff)}
+function svgUrl(ch){var h=ch.codePointAt(0).toString(16).padStart(5,"0");return "https://raw.githubusercontent.com/KanjiVG/kanjivg/master/kanji/"+h+".svg"}
+function stroke(ch){
+ var box=document.createElement("div"); box.className=isKanji(ch)?"strokeBox":"kana";
+ if(!isKanji(ch)){box.textContent=ch;return box}
+ fetch(svgUrl(ch)).then(r=>{if(!r.ok)throw 0;return r.text()}).then(txt=>{
+   var p=new DOMParser().parseFromString(txt,"image/svg+xml"),svg=p.documentElement;
+   var nums=svg.querySelector('[id^="kvg:StrokeNumbers_"]'); if(nums) nums.remove();
+   svg.setAttribute("viewBox","0 0 109 109"); svg.removeAttribute("width");svg.removeAttribute("height");
+   var paths=[...svg.querySelectorAll('path')]; paths.forEach((x,n)=>{x.style.fill="none";x.style.stroke="#222";x.style.strokeWidth="3";x.style.strokeLinecap="round";x.style.strokeLinejoin="round";var L=220;x.style.strokeDasharray=L;x.style.strokeDashoffset=L;x.style.animation="draw .45s ease forwards";x.style.animationDelay=(n*.38)+"s"});
+   box.appendChild(document.importNode(svg,true));
+ }).catch(()=>{box.textContent=ch;box.style.fontSize="34px";box.style.display="flex";box.style.alignItems="center";box.style.justifyContent="center"});
+ return box
+}
+var style=document.createElement("style");style.textContent="@keyframes draw{to{stroke-dashoffset:0}}";document.head.appendChild(style);
+function draw(){
+ if(idx>=Q.length){main.style.display="none";finish.style.display="block";sum.textContent=Q.length+"問中 "+good+"問 覚えた！";return}
+ var x=Q[idx],p=x.text.indexOf(x.target);no.textContent="問題 "+x.id+"　（"+(idx+1)+" / "+Q.length+"）";
+ q.innerHTML=e(x.text.slice(0,p))+'<span class="t">'+e(x.target)+'</span>'+e(x.text.slice(p+x.target.length));
+ a.textContent=x.answer;ans.style.display="none";show.style.display="block";grades.style.display="none";strokes.innerHTML="";
+ ok.textContent=good;ng.textContent=bad;yet.textContent=Q.length-idx;
+}
+show.onclick=function(){ans.style.display="block";show.style.display="none";grades.style.display="flex";strokes.innerHTML="";[...Q[idx].answer].filter(isKanji).forEach(ch=>strokes.appendChild(stroke(ch)))};
+function rate(v){if(v)good++;else bad++;idx++;draw()}bOk.onclick=()=>rate(1);bMid.onclick=()=>rate(0);bNg.onclick=()=>rate(0);
+again.onclick=function(){idx=good=bad=0;main.style.display="block";finish.style.display="none";draw()};draw();
+</script></body></html>
