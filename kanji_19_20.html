@@ -1,0 +1,76 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>漢字練習19・20</title><style>
+*{box-sizing:border-box}body{margin:0;font-family:"BIZ UDPGothic","Yu Gothic",sans-serif;color:#222}.app{max-width:540px;margin:auto;padding:18px}
+h1{font-size:25px;margin:0 0 12px;border-bottom:1px solid #ddd;padding-bottom:12px}.stats{display:flex;gap:8px}.s{flex:1;background:#f1f2f4;border-radius:14px;text-align:center;padding:9px 2px;font-size:13px}.s b{font-size:23px}
+.card{margin-top:16px;border:1px solid #d5d5d5;border-radius:20px;min-height:280px;padding:18px;display:flex;flex-direction:column;justify-content:center}.no{color:#666;font-size:13px;margin-bottom:12px}.q{font-size:25px;line-height:1.75;text-align:center}
+.t{color:#d22;text-decoration:underline 2px;text-underline-offset:5px;font-weight:bold}#ans{display:none;text-align:center;margin-top:12px}.answer{font-family:"Yu Mincho",serif;font-size:44px;font-weight:600}
+.strokeTitle{font-size:12px;color:#666;margin:8px 0 5px}.strokeRow{display:flex;gap:7px;justify-content:center;flex-wrap:wrap}.strokeBox{width:76px;height:76px;border:1px solid #ddd;border-radius:8px;overflow:hidden}.strokeBox svg{width:100%;height:100%}
+button{width:100%;border:0;border-radius:15px;padding:15px;font-size:18px;font-weight:bold;margin-top:13px}#show{background:#1976d2;color:#fff}#grades{display:none;gap:7px}#grades button{font-size:15px;padding:13px 3px;background:#eee}#grades .ok{background:#e4f4e8}#grades .ng{background:#fde7e7}
+#finish{display:none;text-align:center;padding:55px 10px}#again{background:#1976d2;color:#fff}@keyframes drawStroke{to{stroke-dashoffset:0}}
+</style></head><body><div class="app"><h1>漢字練習 19・20</h1>
+<div class="stats"><div class="s">覚えた<br><b id="ok">0</b></div><div class="s">未クリア<br><b id="ng">40</b></div><div class="s">この周の残り<br><b id="yet">40</b></div></div>
+<div id="main"><div class="card"><div class="no" id="no"></div><div class="q" id="q"></div><div id="ans"><div class="answer" id="a"></div><div class="strokeTitle">書き順</div><div class="strokeRow" id="strokes"></div></div></div>
+<button id="show">答えを見る</button><div id="grades"><button class="ok" id="bOk">○ 覚えた</button><button id="bMid">△ あやしい</button><button class="ng" id="bNg">× もう一度</button></div></div>
+<div id="finish"><h2 id="ft">復習へ</h2><p id="sum"></p><button id="again">続ける</button></div></div>
+<script>
+var ALL=[{"id": "1-1", "text": "でんとうをうけつぐ。", "target": "でんとう", "answer": "伝統"}, {"id": "1-2", "text": "でんとうをうけつぐ。", "target": "うけつぐ", "answer": "受けつぐ"}, {"id": "2-1", "text": "こなゆきがまう。", "target": "こなゆき", "answer": "粉雪"}, {"id": "3-1", "text": "じどうしゃをゆしゅつする。", "target": "じどうしゃ", "answer": "自動車"}, {"id": "3-2", "text": "じどうしゃをゆしゅつする。", "target": "ゆしゅつ", "answer": "輸出"}, {"id": "4-1", "text": "さいしんのぎじゅつ。", "target": "さいしん", "answer": "最新"}, {"id": "4-2", "text": "さいしんのぎじゅつ。", "target": "ぎじゅつ", "answer": "技術"}, {"id": "5-1", "text": "くらしをささえる。", "target": "ささえる", "answer": "支える"}, {"id": "6-1", "text": "こがたのふね。", "target": "こがた", "answer": "小型"}, {"id": "6-2", "text": "こがたのふね。", "target": "ふね", "answer": "船"}, {"id": "7-1", "text": "ぶんかをさいはっけんする。", "target": "ぶんか", "answer": "文化"}, {"id": "7-2", "text": "ぶんかをさいはっけんする。", "target": "さいはっけん", "answer": "再発見"}, {"id": "8-1", "text": "さんかにんずうをかぎる。", "target": "さんか", "answer": "参加"}, {"id": "8-2", "text": "さんかにんずうをかぎる。", "target": "にんずう", "answer": "人数"}, {"id": "8-3", "text": "さんかにんずうをかぎる。", "target": "かぎる", "answer": "限る"}, {"id": "9-1", "text": "こうかてきなれんしゅう。", "target": "こうかてき", "answer": "効果的"}, {"id": "9-2", "text": "こうかてきなれんしゅう。", "target": "れんしゅう", "answer": "練習"}, {"id": "10-1", "text": "こむぎこをかう。", "target": "こむぎこ", "answer": "小麦粉"}, {"id": "10-2", "text": "こむぎこをかう。", "target": "かう", "answer": "買う"}, {"id": "11-1", "text": "かふんがとぶ。", "target": "かふん", "answer": "花粉"}, {"id": "11-2", "text": "かふんがとぶ。", "target": "とぶ", "answer": "飛ぶ"}, {"id": "12-1", "text": "かいがいにしてんをだす。", "target": "かいがい", "answer": "海外"}, {"id": "12-2", "text": "かいがいにしてんをだす。", "target": "してん", "answer": "支店"}, {"id": "12-3", "text": "かいがいにしてんをだす。", "target": "だす", "answer": "出す"}, {"id": "13-1", "text": "てんけいてきなかたち。", "target": "てんけいてき", "answer": "典型的"}, {"id": "13-2", "text": "てんけいてきなかたち。", "target": "かたち", "answer": "形"}, {"id": "14-1", "text": "さらいしゅうのよてい。", "target": "さらいしゅう", "answer": "再来週"}, {"id": "14-2", "text": "さらいしゅうのよてい。", "target": "よてい", "answer": "予定"}, {"id": "15-1", "text": "ふたたびしごとをはじめる。", "target": "ふたたび", "answer": "再び"}, {"id": "15-2", "text": "ふたたびしごとをはじめる。", "target": "しごと", "answer": "仕事"}, {"id": "15-3", "text": "ふたたびしごとをはじめる。", "target": "はじめる", "answer": "始める"}, {"id": "16-1", "text": "きかんげんていのおかし。", "target": "きかんげんてい", "answer": "期間限定"}, {"id": "17-1", "text": "かぜぐすりがきく。", "target": "ぐすり", "answer": "薬"}, {"id": "17-2", "text": "かぜぐすりがきく。", "target": "きく", "answer": "効く"}, {"id": "18-1", "text": "げんざいのじこく。", "target": "げんざい", "answer": "現在"}, {"id": "18-2", "text": "げんざいのじこく。", "target": "じ", "answer": "時"}, {"id": "19-1", "text": "せかいのれきし。", "target": "せかい", "answer": "世界"}, {"id": "19-2", "text": "せかいのれきし。", "target": "れきし", "answer": "歴史"}, {"id": "20-1", "text": "きせつがうつる。", "target": "きせつ", "answer": "季節"}, {"id": "20-2", "text": "きせつがうつる。", "target": "うつる", "answer": "移る"}],queue=[],idx=0,round=1,learned={},missed=[],locked=false;
+function E(x){return document.getElementById(x)}var no=E("no"),q=E("q"),ans=E("ans"),a=E("a"),strokes=E("strokes"),show=E("show"),grades=E("grades"),bOk=E("bOk"),bMid=E("bMid"),bNg=E("bNg"),ok=E("ok"),ng=E("ng"),yet=E("yet"),main=E("main"),finish=E("finish"),sum=E("sum"),again=E("again"),ft=E("ft");
+function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}function isK(c){var n=c.codePointAt(0);return(n>=0x3400&&n<=0x9fff)||(n>=0xf900&&n<=0xfaff)}
+function url(c){var h=c.codePointAt(0).toString(16);while(h.length<5)h="0"+h;return"https://raw.githubusercontent.com/KanjiVG/kanjivg/master/kanji/"+h+".svg"}
+function stroke(c){
+ var box=document.createElement("div");box.className="strokeBox";
+ fetch(url(c)).then(function(r){if(!r.ok)throw Error();return r.text()}).then(function(t){
+  var doc=new DOMParser().parseFromString(t,"image/svg+xml");
+  var source=doc.documentElement;
+  var groups=source.querySelectorAll('g[id^="kvg:StrokePaths_"]');
+  if(!groups.length)throw Error();
+
+  var svg=document.createElementNS("http://www.w3.org/2000/svg","svg");
+  svg.setAttribute("viewBox","0 0 109 109");
+  svg.setAttribute("width","100%");svg.setAttribute("height","100%");
+  svg.appendChild(document.importNode(groups[0],true));
+  box.appendChild(svg);
+
+  var ps=svg.querySelectorAll("path"), list=[];
+  for(var i=0;i<ps.length;i++){
+    var p=ps[i],L=180;
+    try{L=p.getTotalLength()}catch(e){}
+    p.removeAttribute("style");
+    p.setAttribute("fill","none");
+    p.setAttribute("stroke","#222");
+    p.setAttribute("stroke-width","3.2");
+    p.setAttribute("stroke-linecap","round");
+    p.setAttribute("stroke-linejoin","round");
+    p.style.strokeDasharray=L+" "+L;
+    p.style.strokeDashoffset=String(L);
+    p.style.visibility="hidden";
+    list.push({p:p,len:L});
+  }
+
+  var i=0;
+  function next(){
+    if(i>=list.length)return;
+    var x=list[i++], start=null;
+    x.p.style.visibility="visible";
+    function frame(ts){
+      if(start===null)start=ts;
+      var q=Math.min(1,(ts-start)/430);
+      x.p.style.strokeDashoffset=String(x.len*(1-q));
+      if(q<1)requestAnimationFrame(frame);
+      else{ x.p.style.strokeDashoffset="0"; setTimeout(next,80); }
+    }
+    requestAnimationFrame(frame);
+  }
+  setTimeout(next,200);
+ }).catch(function(){box.textContent=c;box.style.fontSize="34px"});
+ return box
+}
+function shuffle(x){for(var i=x.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),z=x[i];x[i]=x[j];x[j]=z}return x}function count(){var n=0;for(var k in learned)if(learned[k])n++;return n}
+function stats(){ok.textContent=count();ng.textContent=ALL.length-count();yet.textContent=Math.max(0,queue.length-idx)}
+function begin(x){queue=x.slice();if(round>1)shuffle(queue);idx=0;missed=[];main.style.display="block";finish.style.display="none";draw()}
+function draw(){locked=false;if(idx>=queue.length){end();return}var x=queue[idx],p=x.text.indexOf(x.target);no.textContent=(round==1?"問題 ":"復習 "+round+"周目　")+x.id+"　（"+(idx+1)+" / "+queue.length+"）";q.innerHTML=esc(x.text.slice(0,p))+'<span class="t">'+esc(x.target)+'</span>'+esc(x.text.slice(p+x.target.length));a.textContent=x.answer;ans.style.display="none";show.style.display="block";grades.style.display="none";strokes.innerHTML="";stats()}
+show.onclick=function(){ans.style.display="block";show.style.display="none";grades.style.display="flex";var cs=Array.from(queue[idx].answer);for(var i=0;i<cs.length;i++)if(isK(cs[i]))strokes.appendChild(stroke(cs[i]))}
+function rate(v){if(locked)return;locked=true;var x=queue[idx];if(v=="ok")learned[x.id]=true;else{learned[x.id]=false;missed.push(x)};setTimeout(function(){idx++;draw()},180)}bOk.onclick=function(){rate("ok")};bMid.onclick=function(){rate("mid")};bNg.onclick=function(){rate("ng")};
+function end(){main.style.display="none";finish.style.display="block";if(!missed.length){ft.textContent="おわり！";sum.textContent="全問クリア！";again.textContent="最初から";again.onclick=function(){location.reload()};return}round++;var nx=missed.slice();ft.textContent="復習へ";sum.textContent=nx.length+"問をもう一度やります。";again.textContent="覚えていない問題だけ続ける";again.onclick=function(){begin(nx)}}
+begin(ALL);
+</script></body></html>
