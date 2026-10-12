@@ -1,0 +1,136 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>漢字練習26</title><style>
+*{box-sizing:border-box}body{margin:0;font-family:"BIZ UDPGothic","Yu Gothic",sans-serif;color:#222}.app{max-width:540px;margin:auto;padding:18px}
+h1{font-size:25px;margin:0 0 12px;border-bottom:1px solid #ddd;padding-bottom:12px}.stats{display:flex;gap:8px}.s{flex:1;background:#f1f2f4;border-radius:14px;text-align:center;padding:9px 2px;font-size:13px}.s b{font-size:23px}
+.card{margin-top:16px;border:1px solid #d5d5d5;border-radius:20px;min-height:280px;padding:18px;display:flex;flex-direction:column;justify-content:center}.no{color:#666;font-size:13px;margin-bottom:12px}.q{font-size:25px;line-height:1.75;text-align:center}
+.t{color:#d22;text-decoration:underline 2px;text-underline-offset:5px;font-weight:bold}#ans{display:none;text-align:center;margin-top:12px}.answer{font-family:"Yu Mincho",serif;font-size:44px;font-weight:600}
+.strokeTitle{font-size:12px;color:#666;margin:8px 0 5px}.strokeRow{display:flex;gap:7px;justify-content:center;flex-wrap:wrap}.strokeBox{width:76px;height:76px;border:1px solid #ddd;border-radius:8px;overflow:hidden}.strokeBox svg{width:100%;height:100%}
+button{width:100%;border:0;border-radius:15px;padding:15px;font-size:18px;font-weight:bold;margin-top:13px}#show{background:#1976d2;color:#fff}#grades{display:none;gap:7px}#grades button{font-size:15px;padding:13px 3px;background:#eee}#grades .ok{background:#e4f4e8}#grades .ng{background:#fde7e7}
+#finish{display:none;text-align:center;padding:55px 10px}#again{background:#1976d2;color:#fff}@keyframes drawStroke{to{stroke-dashoffset:0}}
+</style></head><body><div class="app"><h1>漢字練習 26</h1>
+<div class="stats"><div class="s">覚えた<br><b id="ok">0</b></div><div class="s">未クリア<br><b id="ng">19</b></div><div class="s">この周の残り<br><b id="yet">19</b></div></div>
+<div id="main"><div class="card"><div class="no" id="no"></div><div class="q" id="q"></div><div id="ans"><div class="answer" id="a"></div><div class="strokeTitle">書き順</div><div class="strokeRow" id="strokes"></div></div></div>
+<button id="show">答えを見る</button><div id="grades"><button class="ok" id="bOk">○ 覚えた</button><button id="bMid">△ あやしい</button><button class="ng" id="bNg">× もう一度</button></div></div>
+<div id="finish"><h2 id="ft">復習へ</h2><p id="sum"></p><button id="again">続ける</button></div></div>
+<script>
+
+"use strict";
+(function(){
+const questions = [{"id": "11-1", "text": "えきまえのどうぞう。", "target": "えきまえ", "answer": "駅前"}, {"id": "11-2", "text": "えきまえのどうぞう。", "target": "どうぞう", "answer": "銅像"}, {"id": "12-1", "text": "ぼうえきでさかえる。", "target": "ぼうえき", "answer": "貿易"}, {"id": "12-2", "text": "ぼうえきでさかえる。", "target": "さかえる", "answer": "栄える"}, {"id": "13-1", "text": "がっこうのきそく。", "target": "がっこう", "answer": "学校"}, {"id": "13-2", "text": "がっこうのきそく。", "target": "きそく", "answer": "規則"}, {"id": "14-1", "text": "あんていをたもつ。", "target": "あんてい", "answer": "安定"}, {"id": "14-2", "text": "あんていをたもつ。", "target": "たもつ", "answer": "保つ"}, {"id": "15-1", "text": "つまとこども。", "target": "つま", "answer": "妻"}, {"id": "16-1", "text": "ひろいはたけをたがやす。", "target": "ひろい", "answer": "広い"}, {"id": "16-2", "text": "ひろいはたけをたがやす。", "target": "はたけ", "answer": "畑"}, {"id": "16-3", "text": "ひろいはたけをたがやす。", "target": "たがやす", "answer": "耕す"}, {"id": "17-1", "text": "つみをみとめる。", "target": "つみ", "answer": "罪"}, {"id": "18-1", "text": "おちばをもやす。", "target": "おちば", "answer": "落ち葉"}, {"id": "18-2", "text": "おちばをもやす。", "target": "もやす", "answer": "燃やす"}, {"id": "19-1", "text": "やさしいせつめい。", "target": "やさしい", "answer": "易しい"}, {"id": "19-2", "text": "やさしいせつめい。", "target": "せつめい", "answer": "説明"}, {"id": "20-1", "text": "あんいなかんがえ。", "target": "あんい", "answer": "安易"}, {"id": "20-2", "text": "あんいなかんがえ。", "target": "かんがえ", "answer": "考え"}];
+const el = id => document.getElementById(id);
+const ui = {
+ number:el("no"), question:el("q"), answerArea:el("ans"),
+ answer:el("a"), strokes:el("strokes"), reveal:el("show"),
+ grades:el("grades"), ok:el("ok"), remaining:el("ng"),
+ inRound:el("yet"), main:el("main"), finish:el("finish"),
+ summary:el("sum"), again:el("again"), finishTitle:el("ft")
+};
+let current=questions.slice(), pos=0, retry=[], cleared=new Set(), round=1, locked=false;
+function escapeHTML(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
+function stats(){
+ ui.ok.textContent=cleared.size;
+ ui.remaining.textContent=questions.length-cleared.size;
+ ui.inRound.textContent=Math.max(0,current.length-pos);
+}
+function render(){
+ locked=false;
+ if(pos>=current.length){endRound();return;}
+ const item=current[pos];
+ const start=item.text.indexOf(item.target);
+ ui.number.textContent=(round===1?"問題 ":"復習 "+round+"周目　")+item.id+" （"+(pos+1)+" / "+current.length+"）";
+ ui.question.innerHTML=start<0?escapeHTML(item.text):escapeHTML(item.text.slice(0,start))+'<span class="t">'+escapeHTML(item.target)+'</span>'+escapeHTML(item.text.slice(start+item.target.length));
+ ui.answer.textContent=item.answer;
+ ui.answerArea.style.display="none";
+ ui.reveal.style.display="block";
+ ui.grades.style.display="none";
+ ui.strokes.replaceChildren();
+ stats();
+}
+function isKanji(ch){const n=ch.codePointAt(0);return (n>=0x3400&&n<=0x9fff)||(n>=0xf900&&n<=0xfaff);}
+function stroke(ch){
+ const box=document.createElement("div");box.className="strokeBox";
+ const code=ch.codePointAt(0).toString(16).padStart(5,"0");
+ fetch("https://raw.githubusercontent.com/KanjiVG/kanjivg/master/kanji/"+code+".svg")
+ .then(r=>{if(!r.ok)throw Error("missing");return r.text()})
+ .then(t=>{
+  const doc=new DOMParser().parseFromString(t,"image/svg+xml");
+  const group=doc.querySelector('g[id^="kvg:StrokePaths_"]');
+  if(!group)throw Error("paths");
+  const svg=document.createElementNS("http://www.w3.org/2000/svg","svg");
+  svg.setAttribute("viewBox","0 0 109 109");
+  svg.appendChild(document.importNode(group,true));
+  box.appendChild(svg);
+  const paths=[...svg.querySelectorAll("path")];
+  const lengths=paths.map(p=>{
+   const length=p.getTotalLength()||1;
+   p.style.fill="none";p.style.stroke="#222";p.style.strokeWidth="3.2";
+   p.style.strokeLinecap="round";p.style.strokeLinejoin="round";
+   p.style.strokeDasharray=length+" "+length;
+   p.style.strokeDashoffset=String(length);
+   p.style.visibility="hidden";
+   return length;
+  });
+  let i=0;
+  function next(){
+   if(i>=paths.length)return;
+   const p=paths[i], length=lengths[i];i++;
+   p.style.visibility="visible";
+   let started=null;
+   function frame(t){
+    if(started===null)started=t;
+    const progress=Math.min(1,(t-started)/430);
+    p.style.strokeDashoffset=String(length*(1-progress));
+    if(progress<1)requestAnimationFrame(frame);
+    else setTimeout(next,80);
+   }
+   requestAnimationFrame(frame);
+  }
+  setTimeout(next,120);
+ }).catch(()=>{box.textContent=ch;box.style.fontSize="34px";});
+ return box;
+}
+ui.reveal.addEventListener("click",()=>{
+ if(pos>=current.length)return;
+ ui.answerArea.style.display="block";
+ ui.reveal.style.display="none";
+ ui.grades.style.display="flex";
+ for(const ch of current[pos].answer)if(isKanji(ch))ui.strokes.appendChild(stroke(ch));
+});
+function rate(success){
+ if(locked||pos>=current.length)return;
+ locked=true;
+ const item=current[pos];
+ if(success)cleared.add(item.id);
+ else{cleared.delete(item.id);retry.push(item);}
+ setTimeout(()=>{pos++;render()},190);
+}
+el("bOk").addEventListener("click",()=>rate(true));
+el("bMid").addEventListener("click",()=>rate(false));
+el("bNg").addEventListener("click",()=>rate(false));
+function begin(items){
+ current=items.slice();
+ if(round>1)current.sort(()=>Math.random()-.5);
+ pos=0;retry=[];
+ ui.main.style.display="block";ui.finish.style.display="none";
+ render();
+}
+function endRound(){
+ ui.main.style.display="none";ui.finish.style.display="block";
+ if(retry.length===0){
+  ui.finishTitle.textContent="おわり！";
+  ui.summary.textContent="全問クリア！";
+  ui.again.textContent="最初から";
+  ui.again.onclick=()=>{round=1;cleared.clear();begin(questions)};
+ }else{
+  round++;
+  const pending=retry.slice();
+  ui.finishTitle.textContent="復習へ";
+  ui.summary.textContent=pending.length+"問をもう一度やります。";
+  ui.again.textContent="覚えていない問題だけ続ける";
+  ui.again.onclick=()=>begin(pending);
+ }
+}
+begin(questions);
+})();
+
+</script></body></html>
